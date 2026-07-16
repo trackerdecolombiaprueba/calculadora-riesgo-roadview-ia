@@ -46,22 +46,21 @@ function calculateRisk(input) {
   let headline;
   let description;
   
-  // Redistribución a 3 niveles con estadísticas fuertes extraídas de la data de LATAM
+  // Textos optimizados para lectura rápida en Web/UI
   if (score <= 33) {
     level = 'Medio';
     headline = 'Riesgo latente: Toda operación exige prevención continua';
-    description = `En la gestión de flotas no existe el "riesgo cero". En ${country.name}, se registraron ${formatNumber(country.accidentes)} siniestros viales que dejaron ${formatNumber(country.lesionados)} lesionados y ${formatNumber(country.muertes)} fallecidos. El nivel Medio refleja que toda flota comercial está expuesta diariamente a factores externos (clima, tráfico, decisiones de terceros), haciendo indispensable mantener protocolos preventivos activos en cada recorrido.`;
+    description = `El "riesgo cero" no existe. En ${country.name} se registran ${formatNumber(country.accidentes)} siniestros, dejando ${formatNumber(country.lesionados)} lesionados y ${formatNumber(country.muertes)} fallecidos. Toda flota enfrenta factores externos impredecibles, haciendo indispensable la prevención en cada recorrido.`;
   } else if (score <= 66) {
     level = 'Alto';
     headline = 'Exposición elevada: Tu operación enfrenta un riesgo significativo';
-    description = `La combinación de tus horarios, vehículos o rutas eleva tu vulnerabilidad. Con un historial de ${formatNumber(country.accidentes)} accidentes en ${country.name}, que resultaron en ${formatNumber(country.lesionados)} heridos y ${formatNumber(country.muertes)} fatalidades, este nivel Alto advierte una probabilidad considerable de incidentes con daños materiales o lesiones. Es prioritario fortalecer tu operación con tecnologías de rastreo y alertas tempranas.`;
+    description = `Tus rutas, horarios o vehículos elevan tu exposición. Con ${formatNumber(country.accidentes)} accidentes y ${formatNumber(country.lesionados)} heridos reportados en ${country.name}, la probabilidad de incidentes es considerable. Es prioritario integrar tecnologías de rastreo y alertas tempranas.`;
   } else {
     level = 'Crítico';
     headline = 'Alerta máxima: Tu perfil operativo requiere intervención inmediata';
-    description = `Tu operación concentra las variables de mayor peligrosidad vial. Operar en ${country.name} —donde se reportan ${formatNumber(country.accidentes)} siniestros con un saldo de ${formatNumber(country.muertes)} fallecidos— bajo estas condiciones de alta exposición sin medidas estrictas amenaza la continuidad del negocio y la vida de los conductores. Este nivel Crítico exige adoptar de inmediato sistemas avanzados de prevención y control.`;
+    description = `Tu perfil concentra variables de alta peligrosidad. Ante los ${formatNumber(country.accidentes)} siniestros y ${formatNumber(country.muertes)} fallecidos en ${country.name}, operar sin medidas estrictas amenaza el negocio. Se requiere intervención y control preventivo de inmediato.`;
   }
 
-  // Igualamos internalLevel a level para mantener la compatibilidad de costos y data interna
   const internalLevel = level;
 
   const drivers = [
