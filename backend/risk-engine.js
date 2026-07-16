@@ -37,29 +37,23 @@ function calculateRisk(input) {
   const raw = country.rate * vehicle.mult * age.mult * use.mult * hours.mult * time.mult * zone.mult;
   const score = Math.min(100, Math.round(raw / 1.1) + 2);
 
-  let internalLevel;
+  let level;
   let description;
-  if (score <= 15) {
-    internalLevel = 'Bajo';
-    description = 'Tu perfil actual se encuentra entre los de menor exposición de la región. Aun así, cada recorrido puede incorporar variables externas que requieren prevención y monitoreo.';
-  } else if (score <= 45) {
-    internalLevel = 'Medio';
+  
+  // Redistribución a 3 niveles exactos
+  if (score <= 33) {
+    level = 'Medio';
     description = 'Tu operación combina factores asociados con una mayor exposición al riesgo. Existen oportunidades concretas para fortalecer la prevención y reducir el impacto de posibles incidentes.';
-  } else if (score <= 70) {
-    internalLevel = 'Alto';
+  } else if (score <= 66) {
+    level = 'Alto';
     description = 'Tu perfil combina varios factores relacionados con una mayor probabilidad y severidad de siniestros. La visibilidad y la reacción temprana son prioritarias.';
   } else {
-    internalLevel = 'Crítico';
+    level = 'Crítico';
     description = 'Tu combinación de país, vehículo, uso y horario coincide con perfiles de alta exposición. Se recomienda implementar medidas preventivas antes de continuar ampliando la operación.';
   }
 
-  // Ajuste: Se corrige el desplazamiento para mantener solo 3 niveles de salida (Medio, Alto, Crítico)
-  const level = {
-    Bajo: 'Medio',
-    Medio: 'Medio',
-    Alto: 'Alto',
-    Crítico: 'Crítico'
-  }[internalLevel];
+  // Igualamos internalLevel a level para mantener la compatibilidad con el resto del código
+  const internalLevel = level;
 
   const drivers = [
     `En ${country.name}, la tasa estimada de mortalidad vial usada como variable base es de ${country.rate.toFixed(1)} por cada 100.000 habitantes.`
@@ -90,21 +84,19 @@ function calculateRisk(input) {
   }
 
   const bands = CURRENCY_BANDS[country.currency] || CURRENCY_BANDS.USD;
+  
+  // Se ajustan las bandas de costo para coincidir con los 3 nuevos niveles
   const costBands = {
-    Bajo: {
+    Medio: {
       value: `${country.symbol} ${formatMoney(bands[0])} – ${country.symbol} ${formatMoney(bands[1])}`,
       note: 'Rango referencial para daños materiales menores y atención ambulatoria.'
     },
-    Medio: {
+    Alto: {
       value: `${country.symbol} ${formatMoney(bands[1])} – ${country.symbol} ${formatMoney(bands[2])}`,
       note: 'Puede incluir hospitalización breve, reparación e incapacidad temporal.'
     },
-    Alto: {
-      value: `${country.symbol} ${formatMoney(bands[2])} – ${country.symbol} ${formatMoney(bands[3])}`,
-      note: 'Puede contemplar cirugía, cuidados intensivos, reparación e incapacidad prolongada.'
-    },
     Crítico: {
-      value: `${country.symbol} ${formatMoney(bands[3])} – ${country.symbol} ${formatMoney(bands[4])}+`,
+      value: `${country.symbol} ${formatMoney(bands[2])} – ${country.symbol} ${formatMoney(bands[3])}+`,
       note: 'Escenario referencial de consecuencias graves, litigios y pérdida de continuidad operativa.'
     }
   };
@@ -113,6 +105,7 @@ function calculateRisk(input) {
   const typicalScore = Math.min(100, Math.round(typicalRaw / 1.1) + 2);
   const difference = score - typicalScore;
   let industryComparison;
+  
   if (Math.abs(difference) <= 3) {
     industryComparison = `Tu índice (${score}) está prácticamente en línea con el perfil estimado de una flota comercial similar en ${country.name} (${typicalScore}/100).`;
   } else if (difference > 0) {
