@@ -38,21 +38,25 @@ function calculateRisk(input) {
   const score = Math.min(100, Math.round(raw / 1.1) + 2);
 
   let level;
+  let headline;
   let description;
   
-  // Redistribución a 3 niveles exactos
+  // Redistribución a 3 niveles con mensajes específicos y argumentos estadísticos
   if (score <= 33) {
     level = 'Medio';
-    description = 'Tu operación combina factores asociados con una mayor exposición al riesgo. Existen oportunidades concretas para fortalecer la prevención y reducir el impacto de posibles incidentes.';
+    headline = 'Riesgo latente: Toda operación exige prevención continua';
+    description = `En la gestión de flotas no existe el "riesgo cero". Aunque tu índice sea de los menores, la tasa base de mortalidad vial en ${country.name} es de ${country.rate} por cada 100.000 habitantes. El nivel Medio refleja que toda flota comercial está expuesta diariamente a factores externos (clima, tráfico, terceros), haciendo indispensable mantener protocolos preventivos activos en cada recorrido.`;
   } else if (score <= 66) {
     level = 'Alto';
-    description = 'Tu perfil combina varios factores relacionados con una mayor probabilidad y severidad de siniestros. La visibilidad y la reacción temprana son prioritarias.';
+    headline = 'Exposición elevada: Tu operación enfrenta un riesgo significativo';
+    description = `La combinación de tus horarios, vehículos o rutas eleva tu vulnerabilidad. Con las altas estadísticas de siniestralidad de ${country.name}, este nivel Alto advierte una probabilidad considerable de incidentes con daños materiales o lesiones. Es prioritario fortalecer tu operación con tecnologías de rastreo, control de hábitos de conducción y alertas tempranas.`;
   } else {
     level = 'Crítico';
-    description = 'Tu combinación de país, vehículo, uso y horario coincide con perfiles de alta exposición. Se recomienda implementar medidas preventivas antes de continuar ampliando la operación.';
+    headline = 'Alerta máxima: Tu perfil operativo requiere intervención inmediata';
+    description = `Tu operación concentra las variables de mayor peligrosidad vial. En ${country.name} (con una tasa de ${country.rate} muertes por cada 100.000 habitantes), operar bajo estas condiciones de alta exposición sin medidas estrictas amenaza la continuidad del negocio y la vida de los conductores. Este nivel Crítico exige adoptar de inmediato sistemas avanzados de prevención y control.`;
   }
 
-  // Igualamos internalLevel a level para mantener la compatibilidad con el resto del código
+  // Igualamos internalLevel a level para mantener la compatibilidad de costos y data interna
   const internalLevel = level;
 
   const drivers = [
@@ -85,7 +89,6 @@ function calculateRisk(input) {
 
   const bands = CURRENCY_BANDS[country.currency] || CURRENCY_BANDS.USD;
   
-  // Se ajustan las bandas de costo para coincidir con los 3 nuevos niveles
   const costBands = {
     Medio: {
       value: `${country.symbol} ${formatMoney(bands[0])} – ${country.symbol} ${formatMoney(bands[1])}`,
@@ -139,7 +142,7 @@ function calculateRisk(input) {
     level,
     internalLevel,
     title: `Riesgo ${level.toLowerCase()} en ${country.name}`,
-    headline: score <= 45 ? 'Tu operación presenta oportunidades de mejora' : 'Tu operación requiere medidas preventivas prioritarias',
+    headline, // Se pasa directo la variable que se asigna en el condicional
     description,
     country: {
       id: country.id,
