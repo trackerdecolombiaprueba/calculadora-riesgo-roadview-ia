@@ -53,10 +53,11 @@ function calculateRisk(input) {
     description = 'Tu combinación de país, vehículo, uso y horario coincide con perfiles de alta exposición. Se recomienda implementar medidas preventivas antes de continuar ampliando la operación.';
   }
 
+  // Ajuste: Se corrige el desplazamiento para mantener solo 3 niveles de salida (Medio, Alto, Crítico)
   const level = {
     Bajo: 'Medio',
-    Medio: 'Alto',
-    Alto: 'Crítico',
+    Medio: 'Medio',
+    Alto: 'Alto',
     Crítico: 'Crítico'
   }[internalLevel];
 
