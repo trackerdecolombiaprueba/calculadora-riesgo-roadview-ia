@@ -25,6 +25,11 @@ function formatMoney(value) {
   return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
+function formatNumber(value) {
+  if (!value) return '0';
+  return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
 function calculateRisk(input) {
   const country = findById(COUNTRIES, input.country, 'país');
   const zone = findById(ZONES, input.zone, 'zona');
@@ -41,19 +46,19 @@ function calculateRisk(input) {
   let headline;
   let description;
   
-  // Redistribución a 3 niveles con mensajes específicos y argumentos estadísticos
+  // Redistribución a 3 niveles con estadísticas fuertes extraídas de la data de LATAM
   if (score <= 33) {
     level = 'Medio';
     headline = 'Riesgo latente: Toda operación exige prevención continua';
-    description = `En la gestión de flotas no existe el "riesgo cero". Aunque tu índice sea de los menores, la tasa base de mortalidad vial en ${country.name} es de ${country.rate} por cada 100.000 habitantes. El nivel Medio refleja que toda flota comercial está expuesta diariamente a factores externos (clima, tráfico, terceros), haciendo indispensable mantener protocolos preventivos activos en cada recorrido.`;
+    description = `En la gestión de flotas no existe el "riesgo cero". En ${country.name}, se registraron ${formatNumber(country.accidentes)} siniestros viales que dejaron ${formatNumber(country.lesionados)} lesionados y ${formatNumber(country.muertes)} fallecidos. El nivel Medio refleja que toda flota comercial está expuesta diariamente a factores externos (clima, tráfico, decisiones de terceros), haciendo indispensable mantener protocolos preventivos activos en cada recorrido.`;
   } else if (score <= 66) {
     level = 'Alto';
     headline = 'Exposición elevada: Tu operación enfrenta un riesgo significativo';
-    description = `La combinación de tus horarios, vehículos o rutas eleva tu vulnerabilidad. Con las altas estadísticas de siniestralidad de ${country.name}, este nivel Alto advierte una probabilidad considerable de incidentes con daños materiales o lesiones. Es prioritario fortalecer tu operación con tecnologías de rastreo, control de hábitos de conducción y alertas tempranas.`;
+    description = `La combinación de tus horarios, vehículos o rutas eleva tu vulnerabilidad. Con un historial de ${formatNumber(country.accidentes)} accidentes en ${country.name}, que resultaron en ${formatNumber(country.lesionados)} heridos y ${formatNumber(country.muertes)} fatalidades, este nivel Alto advierte una probabilidad considerable de incidentes con daños materiales o lesiones. Es prioritario fortalecer tu operación con tecnologías de rastreo y alertas tempranas.`;
   } else {
     level = 'Crítico';
     headline = 'Alerta máxima: Tu perfil operativo requiere intervención inmediata';
-    description = `Tu operación concentra las variables de mayor peligrosidad vial. En ${country.name} (con una tasa de ${country.rate} muertes por cada 100.000 habitantes), operar bajo estas condiciones de alta exposición sin medidas estrictas amenaza la continuidad del negocio y la vida de los conductores. Este nivel Crítico exige adoptar de inmediato sistemas avanzados de prevención y control.`;
+    description = `Tu operación concentra las variables de mayor peligrosidad vial. Operar en ${country.name} —donde se reportan ${formatNumber(country.accidentes)} siniestros con un saldo de ${formatNumber(country.muertes)} fallecidos— bajo estas condiciones de alta exposición sin medidas estrictas amenaza la continuidad del negocio y la vida de los conductores. Este nivel Crítico exige adoptar de inmediato sistemas avanzados de prevención y control.`;
   }
 
   // Igualamos internalLevel a level para mantener la compatibilidad de costos y data interna
@@ -142,7 +147,7 @@ function calculateRisk(input) {
     level,
     internalLevel,
     title: `Riesgo ${level.toLowerCase()} en ${country.name}`,
-    headline, // Se pasa directo la variable que se asigna en el condicional
+    headline,
     description,
     country: {
       id: country.id,
