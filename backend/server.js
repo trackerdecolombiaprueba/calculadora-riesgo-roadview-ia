@@ -48,26 +48,13 @@ app.post('/api/calculate', (req, res) => {
   }
 });
 
-// NUEVO ENDPOINT UNIFICADO: PDF + ZAPIER
+// ENDPOINT EXCLUSIVO PARA EL PDF (Sin Zapier)
 app.post('/api/generate-pdf', async (req, res) => {
   try {
-    const { lead, result, zapData } = req.body;
+    const { lead, result } = req.body;
 
     if (!lead || !result) {
       return res.status(400).json({ error: 'Faltan datos del lead o resultados.' });
-    }
-
-    // El backend se encarga de enviarle a Zapier
-    if (zapData) {
-      try {
-        await fetch('https://hooks.zapier.com/hooks/catch/8666372/4uqq5bl/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(zapData)
-        });
-      } catch (zapErr) {
-        console.error('Error enviando a Zapier (ignorado):', zapErr);
-      }
     }
 
     // Genera y envía el PDF
