@@ -47,16 +47,19 @@ function calculateRisk(input) {
   let description;
   
   // Textos optimizados para lectura rápida en Web/UI
-  // 1. Definimos el nivel y el título según el score
+  // 1. Definimos el nivel, el título y la descripción según el score
   if (score <= 33) {
     level = 'Medio';
     headline = 'Riesgo latente: Toda operación exige prevención continua';
+    description = 'Tu perfil combina factores que, según la evidencia regional, mantienen una probabilidad constante de siniestros viales que debe ser gestionada.';
   } else if (score <= 66) {
     level = 'Alto';
     headline = 'Exposición elevada: Tu operación enfrenta un riesgo significativo';
+    description = 'Tu perfil combina varios factores que, según la evidencia regional, elevan significativamente la probabilidad y severidad de un siniestro vial.';
   } else {
     level = 'Crítico';
     headline = 'Alerta máxima: Tu perfil operativo requiere intervención inmediata';
+    description = 'Tu perfil agrupa factores críticos que, según la evidencia regional, maximizan fuertemente la probabilidad y severidad de un siniestro vial.';
   }
 
   const drivers = [
