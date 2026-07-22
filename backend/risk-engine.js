@@ -46,19 +46,18 @@ function calculateRisk(input) {
   let headline;
   let description;
   
-// Textos optimizados para lectura rápida en Web/UI
-
-// 1. Definimos el nivel y el título según el score
-if (score <= 33) {
-  level = 'Medio';
-  headline = 'Riesgo latente: Toda operación exige prevención continua';
-} else if (score <= 66) {
-  level = 'Alto';
-  headline = 'Exposición elevada: Tu operación enfrenta un riesgo significativo';
-} else {
-  level = 'Crítico';
-  headline = 'Alerta máxima: Tu perfil operativo requiere intervención inmediata';
-}
+  // Textos optimizados para lectura rápida en Web/UI
+  // 1. Definimos el nivel y el título según el score
+  if (score <= 33) {
+    level = 'Medio';
+    headline = 'Riesgo latente: Toda operación exige prevención continua';
+  } else if (score <= 66) {
+    level = 'Alto';
+    headline = 'Exposición elevada: Tu operación enfrenta un riesgo significativo';
+  } else {
+    level = 'Crítico';
+    headline = 'Alerta máxima: Tu perfil operativo requiere intervención inmediata';
+  }
 
   const drivers = [
     `En ${country.name}, la tasa estimada de mortalidad vial usada como variable base es de ${country.rate.toFixed(1)} por cada 100.000 habitantes.`
@@ -141,7 +140,6 @@ if (score <= 33) {
   return {
     score,
     level,
-    internalLevel,
     title: `Riesgo ${level.toLowerCase()} en ${country.name}`,
     headline,
     description,
@@ -165,7 +163,7 @@ if (score <= 33) {
       time: time.name
     },
     drivers,
-    estimatedCost: costBands[internalLevel],
+    estimatedCost: costBands[level],
     industryComparison,
     plan,
     benefits: benefits.slice(0, 4),
