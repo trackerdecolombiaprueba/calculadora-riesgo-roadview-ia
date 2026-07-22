@@ -30,6 +30,13 @@ function formatNumber(value) {
   return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
+// Función auxiliar para escalar el score de 0-100 al rango 44-150
+function scaleScoreToNewRange(raw) {
+  const baseScore = Math.max(0, Math.min(100, Math.round(raw / 1.1) + 2));
+  // Interpola el valor base (0-100) al nuevo rango de 44 a 150 (diferencia de 106)
+  return 44 + Math.round((baseScore / 100) * 106);
+}
+
 function calculateRisk(input) {
   const country = findById(COUNTRIES, input.country, 'país');
   const zone = findById(ZONES, input.zone, 'zona');
@@ -40,19 +47,22 @@ function calculateRisk(input) {
   const time = findById(TIMES, input.time, 'franja horaria');
 
   const raw = country.rate * vehicle.mult * age.mult * use.mult * hours.mult * time.mult * zone.mult;
-  const score = Math.min(100, Math.round(raw / 1.1) + 2);
+  
+  // Nuevo cálculo aplicado con rango 44 a 150
+  const score = scaleScoreToNewRange(raw);
 
   let level;
   let headline;
   let description;
   
   // Textos optimizados para lectura rápida en Web/UI
-  // 1. Definimos el nivel, el título y la descripción según el score
-  if (score <= 33) {
+  // Ajuste de umbrales para el nuevo rango 44-150: 
+  // 1/3 del rango equivale a ~79, 2/3 equivalen a ~115
+  if (score <= 79) {
     level = 'Medio';
     headline = 'Riesgo latente: Toda operación exige prevención continua';
     description = 'Tu perfil combina factores que, según la evidencia regional, mantienen una probabilidad constante de siniestros viales que debe ser gestionada.';
-  } else if (score <= 66) {
+  } else if (score <= 115) {
     level = 'Alto';
     headline = 'Exposición elevada: Tu operación enfrenta un riesgo significativo';
     description = 'Tu perfil combina varios factores que, según la evidencia regional, elevan significativamente la probabilidad y severidad de un siniestro vial.';
@@ -108,16 +118,17 @@ function calculateRisk(input) {
   };
 
   const typicalRaw = country.rate * 1.15 * 1.15 * 1.35 * 1.20 * 1.28 * 1.05;
-  const typicalScore = Math.min(100, Math.round(typicalRaw / 1.1) + 2);
+  // Calculando el puntaje típico en la nueva escala 44-150
+  const typicalScore = scaleScoreToNewRange(typicalRaw);
   const difference = score - typicalScore;
   let industryComparison;
   
   if (Math.abs(difference) <= 3) {
-    industryComparison = `Tu índice (${score}) está prácticamente en línea con el perfil estimado de una flota comercial similar en ${country.name} (${typicalScore}/100).`;
+    industryComparison = `Tu índice (${score}) está prácticamente en línea con el perfil estimado de una flota comercial similar en ${country.name} (${typicalScore}/150).`;
   } else if (difference > 0) {
-    industryComparison = `Tu índice (${score}) está ${difference} puntos por encima del perfil estimado de una flota comercial similar en ${country.name} (${typicalScore}/100).`;
+    industryComparison = `Tu índice (${score}) está ${difference} puntos por encima del perfil estimado de una flota comercial similar en ${country.name} (${typicalScore}/150).`;
   } else {
-    industryComparison = `Tu índice (${score}) está ${Math.abs(difference)} puntos por debajo del perfil estimado de una flota comercial similar en ${country.name} (${typicalScore}/100).`;
+    industryComparison = `Tu índice (${score}) está ${Math.abs(difference)} puntos por debajo del perfil estimado de una flota comercial similar en ${country.name} (${typicalScore}/150).`;
   }
 
   const plan = ['Prioriza rutas y horarios con menor exposición histórica cuando la operación lo permita.'];
