@@ -46,21 +46,22 @@ function calculateRisk(input) {
   let headline;
   let description;
   
- // Textos optimizados para lectura rápida en Web/UI
+// Textos optimizados para lectura rápida en Web/UI
 
-// 1. Definimos el nivel según el score
+// 1. Definimos el nivel y el título según el score
 if (score <= 33) {
   level = 'Medio';
+  headline = 'Riesgo latente: Toda operación exige prevención continua';
 } else if (score <= 66) {
   level = 'Alto';
+  headline = 'Exposición elevada: Tu operación enfrenta un riesgo significativo';
 } else {
   level = 'Crítico';
+  headline = 'Alerta máxima: Tu perfil operativo requiere intervención inmediata';
 }
 
-// 2. El texto será el mismo para todos los niveles
-headline = 'Riesgo latente: Toda operación exige prevención continua';
+// 2. La descripción se mantiene unificada para todos los niveles
 description = `El "riesgo cero" no existe. En ${country.name} se registran ${formatNumber(country.accidentes)} siniestros, dejando ${formatNumber(country.lesionados)} lesionados y ${formatNumber(country.muertes)} fallecidos. Toda flota enfrenta factores externos impredecibles, haciendo indispensable la prevención en cada recorrido.`;
-
   const internalLevel = level;
 
   const drivers = [
