@@ -46,20 +46,20 @@ function calculateRisk(input) {
   let headline;
   let description;
   
-  // Textos optimizados para lectura rápida en Web/UI
-  if (score <= 33) {
-    level = 'Medio';
-    headline = 'Riesgo latente: Toda operación exige prevención continua';
-    description = `El "riesgo cero" no existe. En ${country.name} se registran ${formatNumber(country.accidentes)} siniestros, dejando ${formatNumber(country.lesionados)} lesionados y ${formatNumber(country.muertes)} fallecidos. Toda flota enfrenta factores externos impredecibles, haciendo indispensable la prevención en cada recorrido.`;
-  } else if (score <= 66) {
-    level = 'Alto';
-    headline = 'Exposición elevada: Tu operación enfrenta un riesgo significativo';
-    description = `Tus rutas, horarios o vehículos elevan tu exposición. Con ${formatNumber(country.accidentes)} accidentes y ${formatNumber(country.lesionados)} heridos reportados en ${country.name}, la probabilidad de incidentes es considerable. Es prioritario integrar tecnologías de rastreo y alertas tempranas.`;
-  } else {
-    level = 'Crítico';
-    headline = 'Alerta máxima: Tu perfil operativo requiere intervención inmediata';
-    description = `Tu perfil concentra variables de alta peligrosidad. Ante los ${formatNumber(country.accidentes)} siniestros y ${formatNumber(country.muertes)} fallecidos en ${country.name}, operar sin medidas estrictas amenaza el negocio. Se requiere intervención y control preventivo de inmediato.`;
-  }
+ // Textos optimizados para lectura rápida en Web/UI
+
+// 1. Definimos el nivel según el score
+if (score <= 33) {
+  level = 'Medio';
+} else if (score <= 66) {
+  level = 'Alto';
+} else {
+  level = 'Crítico';
+}
+
+// 2. El texto será el mismo para todos los niveles
+headline = 'Riesgo latente: Toda operación exige prevención continua';
+description = `El "riesgo cero" no existe. En ${country.name} se registran ${formatNumber(country.accidentes)} siniestros, dejando ${formatNumber(country.lesionados)} lesionados y ${formatNumber(country.muertes)} fallecidos. Toda flota enfrenta factores externos impredecibles, haciendo indispensable la prevención en cada recorrido.`;
 
   const internalLevel = level;
 
