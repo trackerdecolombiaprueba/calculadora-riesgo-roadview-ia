@@ -9,17 +9,17 @@ const generatePdf = require('./pdf-generator');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS totalmente abierto y permitiendo el header 'Accept' para el PDF
+// CORS abierto para evitar bloqueos del navegador
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Accept']
 }));
 
-// Límite amplio para evitar cortes de datos
+// Límite de tamaño de datos
 app.use(express.json({ limit: '10mb' }));
 
-app.get('/', (req, res) => res.json({ ok: true, status: 'API Activa', endpoints: ['/api/options', '/api/calculate', '/api/generate-pdf'] }));
+app.get('/', (req, res) => res.json({ ok: true, status: 'API Activa' }));
 app.get('/health', (req, res) => res.json({ ok: true, status: 'healthy' }));
 
 app.get('/api/options', (req, res) => {
@@ -48,7 +48,7 @@ app.post('/api/calculate', (req, res) => {
   }
 });
 
-// NUEVO ENDPOINT UNIFICADO: PDF + ZAPIER
+// NUEVO ENDPOINT UNIFICADO: ZAPIER + PDF
 app.post('/api/generate-pdf', async (req, res) => {
   try {
     const { lead, result, zapData } = req.body;
@@ -57,7 +57,7 @@ app.post('/api/generate-pdf', async (req, res) => {
       return res.status(400).json({ error: 'Faltan datos del lead o resultados.' });
     }
 
-    // El backend se encarga de enviarle a Zapier
+    // 1. El Servidor le envía los datos a Zapier (Esto no lo bloquea el navegador)
     if (zapData) {
       try {
         await fetch('https://hooks.zapier.com/hooks/catch/8666372/4uqq5bl/', {
@@ -66,11 +66,11 @@ app.post('/api/generate-pdf', async (req, res) => {
           body: JSON.stringify(zapData)
         });
       } catch (zapErr) {
-        console.error('Error enviando a Zapier (ignorado):', zapErr);
+        console.error('Error enviando a Zapier:', zapErr);
       }
     }
 
-    // Genera y envía el PDF
+    // 2. Genera y envía el PDF al usuario
     const pdfBuffer = await generatePdf(result, lead);
 
     res.setHeader('Content-Type', 'application/pdf');
@@ -79,7 +79,7 @@ app.post('/api/generate-pdf', async (req, res) => {
     
   } catch (error) {
     console.error('ERROR AL GENERAR PDF:', error);
-    return res.status(500).json({ error: error.message || error.toString() });
+    return res.status(500).json({ error: error.message || 'Error interno del servidor' });
   }
 });
 
