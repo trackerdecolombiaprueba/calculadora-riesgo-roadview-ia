@@ -60,6 +60,9 @@ if (score <= 33) {
   headline = 'Alerta máxima: Tu perfil operativo requiere intervención inmediata';
 }
 
+// 2. La descripción se mantiene unificada para todos los niveles
+description = `El "riesgo cero" no existe. En ${country.name} se registran ${formatNumber(country.accidentes)} siniestros, dejando ${formatNumber(country.lesionados)} lesionados y ${formatNumber(country.muertes)} fallecidos. Toda flota enfrenta factores externos impredecibles, haciendo indispensable la prevención en cada recorrido.`;
+
   const drivers = [
     `En ${country.name}, la tasa estimada de mortalidad vial usada como variable base es de ${country.rate.toFixed(1)} por cada 100.000 habitantes.`
   ];
