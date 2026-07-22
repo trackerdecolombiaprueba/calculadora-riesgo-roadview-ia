@@ -20,7 +20,6 @@ async function generatePdf(result, lead) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const PW = 210, PH = 297, MX = 18, CW = PW - (MX * 2);
   
-  // Paleta de colores ajustada
   const RED = [227, 6, 19], WINE = [143, 20, 5], BLK = [10, 10, 10];
   const WHT = [255, 255, 255], GRY = [85, 85, 85], LGRY = [242, 242, 242], LNE = [220, 220, 220];
   
@@ -38,7 +37,7 @@ async function generatePdf(result, lead) {
   }
   
   function newPage() { if (page > 0) doc.addPage(); page++; addFooter(); }
-  function ensureSpace(h, cY) { if (cY + h > PH - 20) { newPage(); return 30; } return cY; }
+  function ensureSpace(h, cY) { if (cY + h > PH - 25) { newPage(); return 30; } return cY; }
 
   function sectionTitle(txt, cY) {
     cY = ensureSpace(16, cY); 
@@ -49,7 +48,7 @@ async function generatePdf(result, lead) {
     doc.line(MX, cY, PW - MX, cY); return cY + 7;
   }
 
-  // HEADER COMERCIAL
+  // HEADER
   newPage();
   doc.setFillColor(BLK[0], BLK[1], BLK[2]); doc.rect(0, 0, PW, 38, 'F');
   doc.setFillColor(RED[0], RED[1], RED[2]); doc.rect(0, 0, PW, 4, 'F');
@@ -61,7 +60,7 @@ async function generatePdf(result, lead) {
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(255, 255, 255); 
   doc.text('Generado el: ' + dTxt, PW - MX, 28, { align: 'right' });
 
-  // DATOS DEL LEAD (Estructura más limpia B2B)
+  // DATOS DEL LEAD
   let y = 48;
   doc.setFillColor(LGRY[0], LGRY[1], LGRY[2]); doc.roundedRect(MX, y, CW, 22, 2, 2, 'F');
   doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(GRY[0], GRY[1], GRY[2]); doc.text('PREPARADO PARA', MX + 6, y + 8);
@@ -73,7 +72,7 @@ async function generatePdf(result, lead) {
   doc.text([lead.correo, lead.celular].filter(Boolean).join('  |  '), PW - MX - 6, y + 15, { align: 'right' });
   y += 32;
 
-  // SECCIÓN DE SCORE
+  // SCORE Y PANORAMA
   const gX = MX + 26, gY = y + 24, gR = 24;
   drawPdfGauge(doc, gX, gY, gR, 0, 100, [230, 230, 230], 7);
   drawPdfGauge(doc, gX, gY, gR, 0, Number(result.score || 0), RED, 7);
@@ -87,43 +86,7 @@ async function generatePdf(result, lead) {
   doc.text(doc.splitTextToSize("En la vía, toda operación exige prevención continua. La tasa estimada de mortalidad vial usada como variable en esta región es de " + (country.rate || '16.0') + " por cada 100k habitantes.", CW - (rX - MX)), rX, y + 27);
   y += 58;
 
-  // NUEVA SECCIÓN VENDEDORA: ROADVIEW IA AL RESCATE
-  y = ensureSpace(60, y);
-  doc.setFillColor(15, 15, 15); // Fondo oscuro premium
-  doc.roundedRect(MX, y, CW, 65, 3, 3, 'F');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(RED[0], RED[1], RED[2]);
-  doc.text('ASÍ TE PROTEGE DETEKTOR ROADVIEW IA', MX + 8, y + 10);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(200, 200, 200);
-  doc.text('Cámara con Inteligencia Artificial que previene accidentes por fatiga y distracción.', MX + 8, y + 16);
-  
-  // Viñetas a dos columnas
-  doc.setFontSize(9.5); doc.setTextColor(255, 255, 255);
-  const col1 = [
-      '• Doble lente (Alta def. y nocturna).',
-      '• Grabación interior/exterior con audio.',
-      '• IA: Detecta distracciones y fatiga.',
-      '• Alarmas de voz automáticas ante riesgo.'
-  ];
-  const col2 = [
-      '• Video guardado a los 15 seg. del evento.',
-      '• 128 GB SD (46 hrs) + 3 GB en nube.',
-      '• SIM hasta 40 GB para streaming en vivo.',
-      '• Notificaciones inmediatas (App/Correo).'
-  ];
-  
-  let listY = y + 28;
-  col1.forEach((item, i) => {
-      doc.text(item, MX + 8, listY + (i * 7));
-      doc.text(col2[i], MX + 95, listY + (i * 7));
-  });
-
-  // ********** ESPACIO PARA IMAGEN **********
-  // Aquí debes colocar la imagen Base64 (PNG/JPEG).
-  // doc.addImage(base64CameraImage, 'PNG', PW - MX - 40, y + 25, 35, 35);
-  y += 75;
-
-  // ESTADÍSTICAS DEL PAÍS
-  y = sectionTitle('Panorama de Siniestralidad Operativa (' + safeTxt(country.name || selections.country) + ')', y);
+  y = sectionTitle('Panorama de Siniestralidad Operativa', y);
   const stats = [['Accidentes', fmtNum(country.accidents)], ['Lesionados', fmtNum(country.injured)], ['Muertes', fmtNum(country.deaths)], ['Tasa / 100k hab.', Number(country.rate || 0).toFixed(1)]];
   const gap = 4, cW = (CW - gap * 3) / 4;
   stats.forEach(function (s, i) {
@@ -132,19 +95,15 @@ async function generatePdf(result, lead) {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(BLK[0], BLK[1], BLK[2]); doc.text(s[1], x + cW / 2, y + 8, { align: 'center' });
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(GRY[0], GRY[1], GRY[2]); doc.text(s[0], x + cW / 2, y + 13, { align: 'center' });
   });
-  y += 26;
+  y += 28;
 
-  // IMPACTOS ECONÓMICOS
-  y = ensureSpace(35, y);
+  // IMPACTOS
   const impW = (CW - gap) / 2;
-  
-  // Caja de Impacto Económico
   doc.setFillColor(WINE[0], WINE[1], WINE[2]); doc.roundedRect(MX, y, impW, 30, 2, 2, 'F');
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(255, 200, 200); doc.text('IMPACTO ECONÓMICO ESTIMADO', MX + 6, y + 8);
   doc.setFontSize(16); doc.setTextColor(WHT[0], WHT[1], WHT[2]); doc.text(safeTxt(result.estimatedCost?.value).replace(/₡/g, 'CRC '), MX + 6, y + 16);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.text('Costos de hospitalización, reparaciones e incapacidad.', MX + 6, y + 24);
 
-  // Caja de Impacto Operativo
   const xOp = MX + impW + gap;
   doc.setFillColor(250, 250, 250); doc.setDrawColor(LNE[0], LNE[1], LNE[2]); doc.roundedRect(xOp, y, impW, 30, 2, 2, 'FD');
   doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(BLK[0], BLK[1], BLK[2]); doc.text('Impacto adicional en operación', xOp + 6, y + 8);
@@ -152,13 +111,69 @@ async function generatePdf(result, lead) {
   doc.text('• Vehículo detenido:', xOp + 6, y + 15); doc.setFont('helvetica', 'normal'); doc.text('Ingresos perdidos.', xOp + 38, y + 15);
   doc.setFont('helvetica', 'bold'); doc.text('• Sanciones:', xOp + 6, y + 20); doc.setFont('helvetica', 'normal'); doc.text('Procesos y multas.', xOp + 28, y + 20);
   doc.setFont('helvetica', 'bold'); doc.text('• Pólizas:', xOp + 6, y + 25); doc.setFont('helvetica', 'normal'); doc.text('Aumento de primas.', xOp + 22, y + 25);
-  y += 40;
+  
+  // SECCIÓN ROBUSTA: ASÍ TE PROTEGE DETEKTOR ROADVIEW IA (Nueva página para darle impacto visual)
+  newPage();
+  y = 20;
+  
+  doc.setFillColor(15, 15, 15);
+  doc.roundedRect(MX, y, CW, 210, 4, 4, 'F');
+  
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(RED[0], RED[1], RED[2]);
+  doc.text('ASÍ TE PROTEGE DETEKTOR ROADVIEW IA', MX + 10, y + 15);
+  
+  // PILARES PRINCIPALES
+  doc.setFontSize(11); doc.setTextColor(255, 255, 255);
+  doc.text('1. Cámara de alta tecnología:', MX + 10, y + 28);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(200, 200, 200);
+  doc.text(doc.splitTextToSize('Con monitoreo interno y externo, con integración de sistemas ADAS y DMS para la prevención de riesgos.', CW - 80), MX + 10, y + 33);
+  
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(255, 255, 255);
+  doc.text('2. Inteligencia Artificial:', MX + 10, y + 47);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(200, 200, 200);
+  doc.text(doc.splitTextToSize('Vigila en tiempo real los hábitos de manejo de sus conductores, factores de la vía y previene accidentes.', CW - 80), MX + 10, y + 52);
 
-  // CTA (Call To Action) Vendedor
-  y = ensureSpace(25, y);
-  doc.setFillColor(RED[0], RED[1], RED[2]); doc.roundedRect(MX, y, CW, 12, 2, 2, 'F');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(255, 255, 255);
-  doc.text('COTIZAR CON UN ASESOR VÍA WHATSAPP', PW / 2, y + 8, { align: 'center' });
+  // NOTA: Para insertar la imagen WEBP, debes convertirla primero a PNG base64.
+  // const imgCamaraBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."; // REEMPLAZAR ESTO
+  // doc.addImage(imgCamaraBase64, 'PNG', PW - MX - 60, y + 25, 50, 50);
+
+  // LÍNEA DIVISORIA
+  doc.setDrawColor(50, 50, 50); doc.setLineWidth(0.5);
+  doc.line(MX + 10, y + 68, PW - MX - 10, y + 68);
+
+  // BULLETS DETALLADOS
+  const features = [
+    'Grabación optimizada en clips cortos para fácil descarga.',
+    'Monitoreo GPS desde app y plataforma.',
+    'Descarga del video posterior a los eventos.',
+    'Monitoreo y gestión de vehículos 24/7 en tiempo real.',
+    'Monitoreo del comportamiento de conducción.',
+    'Espacio específico de memoria para almacenamiento de eventos como posibles choques, giros bruscos, frenadas fuertes, fatiga, uso teléfono, fumar, no uso de cinturón.',
+    'Alarmas de voz cuando se comete alguna acción catalogada como alarma.',
+    'Registro de alarmas mientras el vehículo esté encendido.'
+  ];
+
+  let featY = y + 78;
+  doc.setFontSize(10); doc.setTextColor(255, 255, 255);
+  features.forEach(feat => {
+    doc.setFillColor(RED[0], RED[1], RED[2]); 
+    doc.circle(MX + 12, featY - 1.5, 1.5, 'F');
+    const lines = doc.splitTextToSize(feat, CW - 25);
+    doc.text(lines, MX + 17, featY);
+    featY += (lines.length * 5) + 4;
+  });
+
+  // BOTÓN CTA CON ENLACE
+  const btnW = 110, btnH = 14;
+  const btnX = (PW - btnW) / 2;
+  const btnY = featY + 15;
+  doc.setFillColor(RED[0], RED[1], RED[2]); 
+  doc.roundedRect(btnX, btnY, btnW, btnH, 3, 3, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(255, 255, 255);
+  doc.text('COTIZAR CON UN ASESOR VÍA WHATSAPP', PW / 2, btnY + 9, { align: 'center' });
+  
+  // Agregar el enlace funcional al PDF
+  doc.link(btnX, btnY, btnW, btnH, { url: 'https://wa.link/7679nl' });
 
   // Output
   const arrayBuffer = doc.output('arraybuffer');
