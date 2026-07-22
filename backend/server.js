@@ -5,6 +5,9 @@ const cors = require('cors');
 const { OPTION_GROUPS } = require('./data');
 const { calculateRisk, validateSelectionPayload } = require('./risk-engine');
 
+// Importamos el generador de PDF
+const generatePdf = require('./pdf-generator');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -37,13 +40,14 @@ app.use(cors({
   allowedHeaders: ['Content-Type']
 }));
 
-app.use(express.json({ limit: '20kb' }));
+// Aumenté un poco el límite (opcional) a 50kb por si el objeto del resultado es un poco más grande
+app.use(express.json({ limit: '50kb' }));
 
 app.get('/', (req, res) => {
   res.json({
     ok: true,
     service: 'API Calculadora Roadview IA',
-    endpoints: ['/api/options', '/api/calculate']
+    endpoints: ['/api/options', '/api/calculate', '/api/generate-pdf']
   });
 });
 
@@ -78,10 +82,40 @@ app.post('/api/calculate', (req, res, next) => {
   }
 });
 
+// ==========================================
+// NUEVO ENDPOINT PARA EL PDF
+// ==========================================
+app.post('/api/generate-pdf', async (req, res, next) => {
+  try {
+    const { lead, result } = req.body;
+    
+    if (!lead || !result) {
+      const error = new Error('Faltan datos del lead o resultados para generar el PDF.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Genera el buffer del PDF usando la librería jspdf en el backend
+    const pdfBuffer = await generatePdf(result, lead);
+
+    // Configura los headers para forzar la descarga del PDF en el navegador
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="informe-riesgo-vial-detektor.pdf"');
+    
+    // Envía el archivo binario
+    res.send(pdfBuffer);
+  } catch (error) {
+    // Pasa el error al manejador global de errores de tu aplicación
+    next(error);
+  }
+});
+
+// Manejador de rutas no encontradas (404)
 app.use((req, res) => {
   res.status(404).json({ ok: false, error: 'Ruta no encontrada.' });
 });
 
+// Manejador global de errores
 app.use((error, req, res, next) => {
   if (error && error.message === 'Origen no permitido por CORS.') {
     return res.status(403).json({ ok: false, error: error.message });
